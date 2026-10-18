@@ -7,8 +7,9 @@
 //! - `Arc<T>` atomic reference counting enables cross-thread sharing
 //! - `lock()` acquires the lock and accesses data
 
+use std::env::consts::ARCH;
 use std::sync::{Arc, Mutex};
-use std::thread;
+use std::thread::{self, ScopedJoinHandle};
 
 /// Increment a counter concurrently using `n_threads` threads.
 /// Each thread increments the counter `count_per_thread` times.
@@ -16,11 +17,20 @@ use std::thread;
 ///
 /// Hint: Use `Arc<Mutex<usize>>` as the shared counter.
 pub fn concurrent_counter(n_threads: usize, count_per_thread: usize) -> usize {
-    // TODO: Create Arc<Mutex<usize>> with initial value 0
-    // TODO: Spawn n_threads threads
-    // TODO: In each thread, lock() and increment count_per_thread times
-    // TODO: Join all threads, return final value
-    todo!()
+    let data = Arc::new(Mutex::new(0));
+    thread::scope(|s| {
+        let mut thread_pool = vec![];
+        for _ in 0..n_threads {
+            let data = Arc::clone(&data);
+            let handle = s.spawn(move || {
+                *data.lock().unwrap() += count_per_thread;
+            });
+            thread_pool.push(handle);
+        }
+        thread_pool.into_iter().map(|thread| thread.join().unwrap());
+    });
+    let x = *data.lock().unwrap();
+    x
 }
 
 /// Add elements to a shared vector concurrently using multiple threads.
@@ -29,10 +39,21 @@ pub fn concurrent_counter(n_threads: usize, count_per_thread: usize) -> usize {
 ///
 /// Hint: Use `Arc<Mutex<Vec<usize>>>`.
 pub fn concurrent_collect(n_threads: usize) -> Vec<usize> {
-    // TODO: Create Arc<Mutex<Vec<usize>>>
-    // TODO: Each thread pushes its own id
-    // TODO: After joining all threads, sort the result and return
-    todo!()
+    let data: Arc<Mutex<Vec<usize>>> = Arc::new(Mutex::new(Vec::new()));
+    thread::scope(|s| {
+        let mut thread_pool = Vec::new();
+        for index in 0..n_threads {
+            let data = Arc::clone(&data);
+            let handle = s.spawn(move || {
+                data.lock().unwrap().push(index);
+            });
+            thread_pool.push(handle);
+        }
+        thread_pool.into_iter().map(|thread| thread.join().unwrap());
+    });
+    let mut res = data.lock().unwrap().clone();
+    res.sort();
+    res
 }
 
 #[cfg(test)]
