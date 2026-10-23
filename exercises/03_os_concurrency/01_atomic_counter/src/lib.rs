@@ -26,7 +26,7 @@ impl AtomicCounter {
     /// Hint: use `fetch_add` with `Ordering::Relaxed`
     pub fn increment(&self) -> u64 {
         let res = self.value.load(Ordering::SeqCst);
-        self.value.store(res + 1, Ordering::SeqCst);
+        self.value.fetch_add(1, Ordering::SeqCst);
         res
     }
 
