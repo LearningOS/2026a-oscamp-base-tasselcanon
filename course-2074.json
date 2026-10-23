@@ -2,8 +2,8 @@
   "schema": 1,
   "courseId": 2074,
   "repository": "LearningOS/2026a-oscamp-base-tasselcanon",
-  "commit": "8a1331e1b4708de698ac5e92e4c03ab3a2383879",
-  "score": 96,
+  "commit": "178a0cb45ef61f431a7751b90b7f0136ff5cc536",
+  "score": 100,
   "totalScore": 100,
   "exercises": [
     {
@@ -72,9 +72,9 @@
     {
       "name": "atomic_counter",
       "max": 4,
-      "score": 0,
-      "status": "fail",
-      "exitCode": 101
+      "score": 4,
+      "status": "pass",
+      "exitCode": 0
     },
     {
       "name": "atomic_ordering",
@@ -176,9 +176,9 @@
     }
   ],
   "student": "tasselcanon",
-  "runId": "39933919164",
-  "runAttempt": "2",
+  "runId": "39936161512",
+  "runAttempt": "1",
   "upload": {
-    "status": "accepted"
+    "status": "pending"
   }
 }
