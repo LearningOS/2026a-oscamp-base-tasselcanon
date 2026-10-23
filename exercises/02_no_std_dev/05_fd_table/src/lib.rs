@@ -48,42 +48,60 @@ pub trait File: Send + Sync {
 
 /// File descriptor table
 pub struct FdTable {
-    // TODO: Design the internal structure
-    // Hint: use Vec<Option<Arc<dyn File>>>
-    //       the index is the fd number, None means the fd is closed or unallocated
+    entries: Vec<Option<Arc<dyn File>>>,
 }
 
 impl FdTable {
     /// Create an empty fd table
     pub fn new() -> Self {
-        // TODO
-        todo!()
+        FdTable {
+            entries: Vec::new(),
+        }
     }
 
     /// Allocate a new fd, return the fd number.
     ///
     /// Prefers reusing the smallest closed fd number; if no free slot, appends to the end.
     pub fn alloc(&mut self, file: Arc<dyn File>) -> usize {
-        // TODO
-        todo!()
+        let new_entry = Some(file);
+        let index = self.entries.iter().position(|slot| slot.is_none());
+        match index {
+            Some(i) => {
+                self.entries[i] = new_entry;
+                i
+            }
+            None => {
+                self.entries.push(new_entry);
+                self.entries.len() - 1
+            }
+        }
     }
 
     /// Get the file object for an fd. Returns None if the fd doesn't exist or is closed.
     pub fn get(&self, fd: usize) -> Option<Arc<dyn File>> {
-        // TODO
-        todo!()
+        if fd >= self.entries.len() {
+            return None;
+        }
+        self.entries[fd].clone()
     }
 
     /// Close an fd. Returns true on success, false if the fd doesn't exist or is already closed.
     pub fn close(&mut self, fd: usize) -> bool {
-        // TODO
-        todo!()
+        if fd >= self.entries.len() {
+            return false;
+        }
+        match self.entries[fd] {
+            Some(_) => {
+                self.entries[fd] = None;
+                true
+            }
+            None => false,
+        }
     }
 
     /// Return the number of currently allocated fds (excluding closed ones)
     pub fn count(&self) -> usize {
-        // TODO
-        todo!()
+        self.entries.iter().filter(|&file| file.is_some()).count()
     }
 }
 
